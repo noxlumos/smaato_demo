@@ -41,7 +41,7 @@ public class AcceptService {
         }
     }
 
-    @Scheduled(fixedRate = 1000 * 60)
+    @Scheduled(cron = "0 * * * * *")
     private void logUniqueIdCount(){
         writeToFile(String.valueOf(set.size()), counterWriter);
         set.clear();

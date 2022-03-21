@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.io.PrintWriter;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.List;
@@ -31,6 +32,8 @@ class SmaatoControllerTest {
 
     @Test
     public void testAcceptWithoutEndpointWithDuplicateIds() throws Exception {
+        PrintWriter writer = new PrintWriter("counterLog.txt");
+        writer.close();
         ThreadPoolExecutor executor =
                 (ThreadPoolExecutor) Executors.newFixedThreadPool(100);
         for (int i=0; i<100; i++) {
@@ -45,12 +48,14 @@ class SmaatoControllerTest {
         Thread.sleep(1000 * 60);
         List<String> allLines = Files.readAllLines(Paths.get("counterLog.txt"));
         for(String line: allLines) {
-            assert(Integer.parseInt(line) <= 1);
+            assert(Integer.parseInt(line.trim()) <= 1);
         }
     }
 
     @Test
     public void testAcceptWithoutEndpointWithUniqueIds() throws Exception {
+        PrintWriter writer = new PrintWriter("counterLog.txt");
+        writer.close();
         ThreadPoolExecutor executor =
                 (ThreadPoolExecutor) Executors.newFixedThreadPool(100);
         for (int i=0; i<100; i++) {
@@ -67,30 +72,7 @@ class SmaatoControllerTest {
         List<String> allLines = Files.readAllLines(Paths.get("counterLog.txt"));
         int sum = 0;
         for(String line: allLines) {
-            sum += Integer.parseInt(line);
-        }
-        assert(sum == 100);
-    }
-
-    @Test
-    public void testAcceptWithEndpointWithUniqueIds() throws Exception {
-        ThreadPoolExecutor executor =
-                (ThreadPoolExecutor) Executors.newFixedThreadPool(100);
-        for (int i=0; i<100; i++) {
-            int finalI = i;
-            executor.submit(() -> {
-                try {
-                    this.mvc.perform(get("/api/smaato/accept?id=" + Integer.toString(finalI))).andDo(print()).andExpect(status().isOk()).andReturn();
-                } catch (Exception e) {
-                    fail();
-                }
-            });
-        }
-        Thread.sleep(1000 * 60);
-        List<String> allLines = Files.readAllLines(Paths.get("counterLog.txt"));
-        int sum = 0;
-        for(String line: allLines) {
-            sum += Integer.parseInt(line);
+            sum += Integer.parseInt(line.trim());
         }
         assert(sum == 100);
     }
